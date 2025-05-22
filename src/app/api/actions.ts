@@ -7,27 +7,28 @@ const openai = new OpenAI({
 console.log("API Key: ", process.env.OPENAI_API_KEY);
 
 export async function getChatGptResponse(prompt: string) {
-  const response = await openai.chat.completions
-    .create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Eres un entrenador personal experto en fitness y nutrición. Responde de manera motivadora y profesional.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    })
-    .then((res) => {
-      return res.choices[0].message.content;
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      return "Sorry, I couldn't process your request.";
-    });
-  return response;
+  const stream = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      {
+        role: "system",
+        content:
+          "Eres un entrenador personal experto en fitness y nutrición. Responde de manera motivadora y profesional.",
+      },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    stream: true,
+  });
+
+  let fullResponse = "";
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content;
+    if (content) {
+      fullResponse += content;
+    }
+  }
+  return fullResponse;
 }

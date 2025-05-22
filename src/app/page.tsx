@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useState } from "react";
-import { getChatGptResponse } from "./api/actions";
+/* import { getChatGptResponse } from "./api/actions"; */
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
@@ -17,11 +17,21 @@ export default function Home() {
     console.log("prompt: ", prompt);
     setChat((prev) => [...prev, { role: "user", content: prompt }]);
     setPrompt("");
-    const response = await getChatGptResponse(prompt);
-    console.log("response: ", response);
-    if (response) {
+    /* const response = await getChatGptResponse(prompt); */
+    const response = await fetch("http://localhost:3000/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await response.json();
+
+    console.log("response: ", data.message);
+    /*     if (data) {
+      const { message } = await data.response.json();
       setChat((prev) => [...prev, { role: "assistant", content: response }]);
-    }
+    } */
   }
 
   return (
