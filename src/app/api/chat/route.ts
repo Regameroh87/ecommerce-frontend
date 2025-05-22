@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
     apiKey: process.env.OPENAI_API_KEY,
   });
   console.log("API Key: ", process.env.OPENAI_API_KEY);
+
   const stream = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
