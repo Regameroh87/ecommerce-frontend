@@ -1,16 +1,36 @@
 "use client";
-import React from "react";
-export default function Home() {
-  const title = "Hello World!";
-  const description =
-    "This is a simple example of a Next.js application with Tailwind CSS and Strapi integration.";
+import { useState } from "react";
+import { getChatGptResponse } from "./api/actions";
 
+export default function Home() {
+  const [prompt, setPrompt] = useState("");
+
+  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setPrompt(() => e.target.value);
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    console.log("prompt: ", prompt);
+    const response = getChatGptResponse(prompt);
+    console.log("response: ", response);
+  }
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <div className="flex min-h-screen w-auto">
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </div>
+    <div className="flex p-80 justify-center min-h-screen">
+      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <input
+          className=" bg-white p-2 text-black"
+          type="text"
+          name="message"
+          onChange={onChange}
+        />
+        <button
+          className=" bg-blue-500 hover:bg-blue-800 p-2 rounded-2xl"
+          type="submit"
+        >
+          Enviar
+        </button>
+      </form>
     </div>
   );
 }
