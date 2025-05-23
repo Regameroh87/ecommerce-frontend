@@ -25,15 +25,15 @@ export default function Home() {
       },
       body: JSON.stringify({ prompt }),
     });
-    const data = await response.json();
+    const reader = response.body?.getReader();
 
-    console.log("response: ", data.message);
-    /*     if (data) {
-      const { message } = await data.response.json();
-      setChat((prev) => [...prev, { role: "assistant", content: response }]);
-    } */
+    while (true) {
+      const { done, value } = await reader!.read();
+      if (done) break;
+      const text = new TextDecoder("utf-8").decode(value);
+      setChat((prev) => [...prev, { role: "assistant", content: text }]);
+    }
   }
-
   return (
     <div className="flex p-80 justify-center min-h-screen">
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
