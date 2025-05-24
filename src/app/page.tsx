@@ -27,6 +27,7 @@ export default function Home() {
       },
       body: JSON.stringify({ prompt }),
     });
+
     const reader = response.body?.getReader();
 
     if (reader) {
@@ -34,44 +35,54 @@ export default function Home() {
         const { done, value } = await reader.read();
         if (done) break;
         const text = new TextDecoder("utf-8").decode(value);
-        /* setChat((prev) => [...prev, { role: "assistant", content: text }]); */
+        setPartialMessage((prev) => prev + text);
+        setIsStreaming(true);
       }
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: partialMessage },
+      ]);
+      console.log("");
+      setIsStreaming(false);
+      setPartialMessage("");
     }
   }
   return (
-    <div className="flex p-80 justify-center min-h-screen">
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <div className="chat-window">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={msg.sender === "user" ? "text-right" : "text-left"}
-            >
-              {msg.text}
-            </div>
-          ))}
+    <div className="flex flex-col p-80 justify-center min-h-screen">
+      <div className=" w-auto h-auto bg-amber-50 text-amber-300 gap-4 overflow-y-auto">
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={msg.role === "user" ? "text-right" : "text-left"}
+          >
+            {msg.content}
+          </div>
+        ))}
 
-          {isStreaming && (
-            <div className="text-left text-gray-500 italic">
-              {partialMessage}
-            </div>
-          )}
-        </div>
-        <input
-          className=" bg-white p-2 text-black"
-          type="text"
-          name="message"
-          autoComplete="off"
-          value={prompt}
-          onChange={onChange}
-        />
-        <button
-          className=" bg-blue-500 hover:bg-blue-800 p-2 rounded-2xl"
-          type="submit"
-        >
-          Enviar
-        </button>
-      </form>
+        {isStreaming && (
+          <div className="text-left text-gray-500 italic m-4">
+            {partialMessage}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-4 m-4">
+        <form onSubmit={handleSubmit}>
+          <input
+            className=" bg-white p-2 text-black"
+            type="text"
+            name="message"
+            autoComplete="off"
+            value={prompt}
+            onChange={onChange}
+          />
+          <button
+            className=" bg-blue-500 hover:bg-blue-800 p-2 rounded-2xl"
+            type="submit"
+          >
+            Enviar
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
