@@ -6,8 +6,7 @@ import { useState } from "react";
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   type Message = { role: string; content: string };
-  const [partialMessage, setPartialMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [chat, setChat] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -17,7 +16,11 @@ export default function Home() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     console.log("prompt: ", prompt);
-    setMessages((prev) => [...prev, { role: "user", content: prompt }]);
+    setChat((prev) => [
+      ...prev,
+      { role: "user", content: prompt },
+      { role: "assistant", content: "" },
+    ]);
     setPrompt("");
 
     const response = await fetch("http://localhost:3000/api/chat", {
@@ -29,60 +32,64 @@ export default function Home() {
     });
 
     const reader = response.body?.getReader();
+    let assistantMsg = "";
 
-    if (reader) {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const text = new TextDecoder("utf-8").decode(value);
-        setPartialMessage((prev) => prev + text);
-        setIsStreaming(true);
+    while (true) {
+      const { value, done } = await reader!.read();
+      if (done) {
+        setIsStreaming(false);
+        break;
       }
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: partialMessage },
-      ]);
-      console.log("");
-      setIsStreaming(false);
-      setPartialMessage("");
+      setIsStreaming(true);
+      assistantMsg += new TextDecoder("utf-8").decode(value);
+      setChat((prev) => {
+        // Actualiza solo el último mensaje (el del assistant)
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: "assistant",
+          content: assistantMsg,
+        };
+        return updated;
+      });
     }
   }
+
   return (
-    <div className="flex flex-col p-80 justify-center min-h-screen">
-      <div className=" w-auto h-auto bg-amber-50 text-amber-300 gap-4 overflow-y-auto">
-        {messages.map((msg, i) => (
+    <div className="flex flex-col p-80 justify-center items-center min-h-screen">
+      <div className=" flex flex-col gap-4 max-w-lg">
+        {chat?.map((message, index) => (
           <div
-            key={i}
-            className={msg.role === "user" ? "text-right" : "text-left"}
+            key={index}
+            className={`  ${
+              message.role === "user"
+                ? " bg-green-200 self-end"
+                : "bg-white self-start"
+            } text-black p-2 m-2 rounded-2xl`}
           >
-            {msg.content}
+            {message.content}
           </div>
         ))}
-
-        {isStreaming && (
-          <div className="text-left text-gray-500 italic m-4">
-            {partialMessage}
-          </div>
-        )}
+        {isStreaming && <div className="text-white">Escribiendo...</div>}
       </div>
-      <div className="flex flex-col gap-4 m-4">
-        <form onSubmit={handleSubmit}>
-          <input
-            className=" bg-white p-2 text-black"
-            type="text"
-            name="message"
-            autoComplete="off"
-            value={prompt}
-            onChange={onChange}
-          />
-          <button
-            className=" bg-blue-500 hover:bg-blue-800 p-2 rounded-2xl"
-            type="submit"
-          >
-            Enviar
-          </button>
-        </form>
-      </div>
+      <form
+        className="flex fixed bottom-6 flex-col gap-4 m-4"
+        onSubmit={handleSubmit}
+      >
+        <input
+          className=" bg-white p-2 text-black"
+          type="text"
+          name="message"
+          autoComplete="off"
+          value={prompt}
+          onChange={onChange}
+        />
+        <button
+          className=" bg-blue-500 hover:bg-blue-800 p-2 rounded-2xl"
+          type="submit"
+        >
+          Enviar
+        </button>
+      </form>
     </div>
   );
 }
