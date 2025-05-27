@@ -55,8 +55,8 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col p-80 justify-center items-center min-h-screen">
-      <div className=" flex flex-col gap-4 max-w-lg">
+    <div className="flex flex-col w-screen p-80 justify-center items-center min-h-screen bg-gray-primary">
+      <div className=" flex flex-col gap-4 h-auto w-full">
         {chat?.map((message, index) => (
           <div
             key={index}
@@ -72,11 +72,11 @@ export default function Home() {
         {isStreaming && <div className="text-white">Escribiendo...</div>}
       </div>
       <form
-        className="flex fixed bottom-6 flex-col gap-4 m-4"
+        className="flex fixed bottom-6 flex-col gap-4 m-4 w-full"
         onSubmit={handleSubmit}
       >
         <input
-          className=" bg-white p-2 text-black"
+          className=" w-1/2 py-4 px-2 mx-6 rounded-2xl  bg-gray-secondary self-center border-0 focus:outline-none"
           type="text"
           name="message"
           autoComplete="off"
@@ -84,7 +84,7 @@ export default function Home() {
           onChange={onChange}
         />
         <button
-          className=" bg-blue-500 hover:bg-blue-800 p-2 rounded-2xl"
+          className=" w-32 bg-blue-500 hover:bg-blue-800 p-2 rounded-2xl self-end mr-4"
           type="submit"
         >
           Enviar

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --color-gray-primary: hsl(0, 0%, 13%);
+  --color-gray-secondary: hsl(0, 0%, 19%);
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
